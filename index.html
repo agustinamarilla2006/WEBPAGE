@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electricidad &amp; Tecnología Profesional | Nosotros te lo arreglamos</title>
+<meta name="description" content="Servicio técnico eléctrico y tecnológico con más de 15 años de experiencia. Atención directa, profesional y de confianza.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          graphite:{ 900:'#0b0f18', 800:'#121824', 700:'#1a2233', 600:'#212b40', 500:'#2c384f', 400:'#455267' },
+          steel:   { 700:'#1c3a63', 600:'#26518c', 500:'#3569ab', 400:'#5a8bc9', 300:'#8fb3e0' },
+          teal:    { 700:'#1f4a48', 600:'#2c6663', 500:'#3d8b86', 400:'#5fada7' },
+          led:     { 400:'#34d399', 500:'#10b981' },
+        },
+        fontFamily: {
+          sans:    ['Inter','ui-sans-serif','system-ui','sans-serif'],
+          display: ['Inter','ui-sans-serif','system-ui','sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  html{ scroll-behavior:smooth; }
+  body{ font-family:'Inter',sans-serif; background:#121824; color:#e7ecf3; }
+
+  /* Cuadrícula técnica muy sutil, en deriva lenta y continua (vida de fondo) */
+  body::before{
+    content:''; position:fixed; inset:-48px; z-index:-2;
+    background-color:#121824;
+    background-image:
+      linear-gradient(rgba(90,139,201,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(90,139,201,0.07) 1px, transparent 1px);
+    background-size:48px 48px;
+    animation:gridDrift 50s linear infinite;
+  }
+  @keyframes gridDrift{ from{ background-position:0 0; } to{ background-position:48px 48px; } }
+
+  body::after{
+    content:''; position:fixed; inset:0; z-index:-2;
+    background:radial-gradient(circle at 50% 0%, rgba(53,105,171,0.12), transparent 55%);
+    animation:glowDrift 14s ease-in-out infinite;
+  }
+  @keyframes glowDrift{
+    0%,100%{ background-position:50% 0%; opacity:1; }
+    50%{ background-position:52% 6%; opacity:.75; }
+  }
+
+  /* Fondo animado de red de nodos: fijo, detrás de todo el contenido, siempre en movimiento */
+  #bg-canvas{ position:fixed; inset:0; z-index:-1; width:100vw; height:100vh; pointer-events:none; }
+
+  /* Brillo suave que sigue al cursor */
+  #cursor-glow{
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background: radial-gradient(circle 320px at var(--mx,50%) var(--my,15%), rgba(90,139,201,0.14), transparent 70%);
+  }
+
+  /* Barrido de luz periódico, tipo escaneo técnico */
+  #sweep-beam{
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background: linear-gradient(100deg, transparent 42%, rgba(95,173,167,0.07) 48%, rgba(90,139,201,0.12) 50%, rgba(95,173,167,0.07) 52%, transparent 58%);
+    background-size: 300% 100%;
+    animation: sweepMove 9s ease-in-out infinite;
+  }
+  @keyframes sweepMove{
+    0%{ background-position: 160% 0; }
+    50%{ background-position: -60% 0; }
+    100%{ background-position: 160% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #bg-canvas, #sweep-beam, #cursor-glow{ display:none; }
+  }
+
+  /* Aparición marcada al hacer scroll: "surge" desde abajo con leve escala */
+  .reveal{ opacity:0; transform:translateY(34px) scale(.97); transition:opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1); }
+  .reveal.in-view{ opacity:1; transform:translateY(0) scale(1); }
+  .reveal-delay-1{ transition-delay:.08s; } .reveal-delay-2{ transition-delay:.16s; } .reveal-delay-3{ transition-delay:.24s; } .reveal-delay-4{ transition-delay:.32s; }
+  .reveal-delay-5{ transition-delay:.4s; } .reveal-delay-6{ transition-delay:.48s; }
+
+  /* Elevación de tarjetas al pasar el cursor, sombra neutra sin resplandor de color */
+  .card-lift{ transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+  .card-lift:hover, .card-lift:focus-visible{ transform:translateY(-5px); box-shadow:0 18px 32px -18px rgba(0,0,0,0.55); border-color:rgba(90,139,201,0.55); }
+
+  /* Microinteracción de botones: leve escala + cambio de tono, sin glow */
+  .btn-lift{ transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease, filter .2s ease; }
+  .btn-lift:hover, .btn-lift:focus-visible{ transform:scale(1.05); box-shadow:0 10px 20px -12px rgba(0,0,0,0.5); filter:brightness(1.08); }
+  .btn-lift:active{ transform:scale(0.98); }
+
+  /* Punto LED de estado, parpadeo muy suave */
+  @keyframes breathe{ 0%,100%{ opacity:.45; } 50%{ opacity:1; } }
+  .animate-breathe{ animation:breathe 3.4s ease-in-out infinite; }
+
+  /* Rebote discreto para invitar a seguir bajando */
+  @keyframes gentleBounce{
+    0%, 100%{ transform:translateY(0); animation-timing-function:ease-in; }
+    50%{ transform:translateY(7px); animation-timing-function:ease-out; }
+  }
+  .animate-gentle-bounce{ animation:gentleBounce 1.8s infinite; }
+
+  /* Indicador deslizante de pestañas */
+
+  /* Transición entre pasos del cotizador */
+  .wizard-step{ animation:stepIn .4s ease; }
+  @keyframes stepIn{ from{ opacity:0; transform:translateX(10px); } to{ opacity:1; transform:translateX(0); } }
+
+  .wa-pop{ transform:scale(.92) translateY(8px); opacity:0; pointer-events:none; transition:all .2s ease; }
+  .wa-pop.open{ transform:scale(1) translateY(0); opacity:1; pointer-events:auto; }
+
+  /* Botón flotante de Play sobre el video */
+  .play-overlay{ transition:opacity .35s ease, transform .35s ease; }
+  .play-overlay.is-hidden{ opacity:0; transform:scale(.9); pointer-events:none; }
+
+  /* Marcas de esquina tipo visor de precisión en el marco del video */
+  .corner-mark{ position:absolute; width:22px; height:22px; border-color:#5a8bc9; }
+
+  ::selection{ background:#3569ab; color:#ffffff; }
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:#1a2233; }
+  ::-webkit-scrollbar-thumb{ background:#3569ab; border-radius:99px; }
+</style>
+</head>
+
+<body class="antialiased overflow-x-hidden">
+
+<!-- Fondo animado: red de nodos y circuitos con pulsos de energía, fija detrás de toda la página -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div id="sweep-beam" aria-hidden="true"></div>
+<div id="cursor-glow" aria-hidden="true"></div>
+
+<!-- ================= NAVBAR ================= -->
+<header class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-graphite-800/85 border-b border-steel-500/15">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="#inicio" class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-lg border border-steel-500/60 bg-graphite-700 flex items-center justify-center p-2 text-steel-400 shrink-0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+      </div>
+      <span class="font-display font-bold tracking-tight text-white text-sm sm:text-base">Electricidad &amp; Tecnología</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+      <a href="#servicios" class="hover:text-white transition">Servicios</a>
+      <a href="#cotizador" class="hover:text-white transition">Cotizador</a>
+      <a href="#taller" class="hover:text-white transition">Taller</a>
+      <a href="#contacto" class="hover:text-white transition">Contacto</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <button id="sound-toggle" aria-label="Activar o silenciar sonido" aria-pressed="true" class="btn-lift w-9 h-9 rounded-lg border border-steel-500/40 bg-graphite-700 hover:border-steel-400 text-steel-400 flex items-center justify-center shrink-0">
+        <svg id="sound-icon-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        <svg id="sound-icon-off" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg>
+      </button>
+      <a href="#cotizador" class="btn-lift hidden sm:inline-flex items-center gap-2 bg-steel-500 hover:bg-steel-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+        Cotizar ahora
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section id="inicio" class="relative min-h-screen flex items-center overflow-hidden pt-20">
+
+  <div class="relative max-w-6xl mx-auto px-5 sm:px-8 py-16 w-full">
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <div class="reveal inline-flex items-center gap-2.5 bg-graphite-700 border border-steel-500/30 rounded-lg px-4 py-1.5 mb-7 text-xs sm:text-sm font-medium text-slate-300 uppercase tracking-wide">
+        <span class="w-2 h-2 rounded-full bg-led-400 animate-breathe"></span>
+        +15 años de trayectoria familiar
+      </div>
+
+      <h1 class="reveal reveal-delay-1 font-display text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.15] mb-6">
+        ¡ATENCIÓN!<br class="hidden sm:block">
+        NOSOTROS TE LO ARREGLAMOS
+      </h1>
+
+      <p class="reveal reveal-delay-2 text-lg sm:text-2xl text-steel-300 font-medium mb-10">
+        "15 años brindando la mejor atención"
+      </p>
+
+      <div class="reveal reveal-delay-3 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#cotizador" class="btn-lift w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-steel-500 hover:bg-steel-600 text-white font-semibold px-7 py-3.5 rounded-lg transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 4H8l1-4Z"/><path d="M6 8h12l1 12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1L6 8Z"/><path d="M9 12h6"/></svg>
+          Cotizá tu reparación
+        </a>
+        <a href="#contacto" class="btn-lift w-full sm:w-auto inline-flex items-center justify-center gap-2 border-2 border-slate-500/50 hover:bg-white/5 text-white font-semibold px-7 py-3.5 rounded-lg transition">
+          Ver contacto directo
+        </a>
+      </div>
+    </div>
+
+    <!-- Tarjetas de especialistas -->
+    <div class="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-3xl mx-auto">
+      <div class="reveal reveal-delay-4 card-lift bg-graphite-700 border border-steel-500/25 rounded-xl p-6 sm:p-7">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-lg border border-steel-500/50 bg-graphite-600 flex items-center justify-center p-3 text-steel-400 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">Alfredo</h3>
+            <p class="text-sm text-steel-400 font-medium">Electricidad</p>
+          </div>
+        </div>
+        <p class="text-slate-400 text-sm mt-4">Instalaciones, cableado, sensores, luces y más.</p>
+        <a href="tel:+5491167989159" class="mt-5 inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition">
+          Llamar ahora
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <div class="reveal reveal-delay-4 card-lift bg-graphite-700 border border-teal-500/25 rounded-xl p-6 sm:p-7">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-lg border border-teal-500/50 bg-graphite-600 flex items-center justify-center p-3 text-teal-400 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">Agustín</h3>
+            <p class="text-sm text-teal-400 font-medium">Tecnología</p>
+          </div>
+        </div>
+        <p class="text-slate-400 text-sm mt-4">Cámaras, Smart TV, celulares, consolas y más.</p>
+        <a href="tel:+5491132037576" class="mt-5 inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition">
+          Llamar ahora
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-slate-500 animate-gentle-bounce">
+    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ================= SERVICIOS: ESPECIALIDADES ================= -->
+<section id="servicios" class="relative py-20 sm:py-28 border-t border-steel-500/10">
+  <div class="relative max-w-6xl mx-auto px-5 sm:px-8">
+
+    <div class="text-center mb-14 reveal">
+      <span class="text-steel-400 font-semibold tracking-widest text-xs uppercase">Nuestras especialidades</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-3">Todo lo que resolvemos</h2>
+      <p class="text-slate-400 mt-3 max-w-xl mx-auto">Dos áreas, dos especialistas, un mismo compromiso familiar.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+
+      <!-- Electricidad -->
+      <div class="reveal reveal-delay-1 card-lift bg-graphite-700 border border-steel-500/25 rounded-xl p-6 sm:p-8">
+        <div class="flex items-center gap-4 mb-7">
+          <div class="w-14 h-14 rounded-lg border border-steel-500/50 bg-graphite-600 flex items-center justify-center p-3 text-steel-400 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-white">Electricidad</h3>
+            <p class="text-sm text-steel-400 font-medium">Atendido por Alfredo</p>
+          </div>
+        </div>
+        <div id="svc-list-electricidad" class="grid sm:grid-cols-2 gap-3"></div>
+      </div>
+
+      <!-- Tecnología -->
+      <div class="reveal reveal-delay-2 card-lift bg-graphite-700 border border-teal-500/25 rounded-xl p-6 sm:p-8">
+        <div class="flex items-center gap-4 mb-7">
+          <div class="w-14 h-14 rounded-lg border border-teal-500/50 bg-graphite-600 flex items-center justify-center p-3 text-teal-400 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-white">Tecnología</h3>
+            <p class="text-sm text-teal-400 font-medium">Atendido por Agustín</p>
+          </div>
+        </div>
+        <div id="svc-list-tecnologia" class="grid sm:grid-cols-2 gap-3"></div>
+      </div>
+
+    </div>
+
+    <div class="reveal reveal-delay-3 text-center mt-10">
+      <a href="#contacto" class="btn-lift inline-flex items-center justify-center gap-2 border-2 border-slate-500/40 hover:bg-white/5 text-white font-semibold px-7 py-3.5 rounded-lg transition">
+        Ver datos de contacto
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COTIZADOR RÁPIDO ================= -->
+<section id="cotizador" class="relative py-20 sm:py-28 border-t border-steel-500/10 overflow-hidden">
+  <div class="relative max-w-3xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-10 reveal">
+      <span class="text-steel-400 font-semibold tracking-widest text-xs uppercase">Cotizador rápido</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-3">Armá tu mensaje en 3 pasos</h2>
+      <p class="text-slate-400 mt-3">Elegí con el dedo o el mouse: no hace falta escribir nada.</p>
+    </div>
+
+    <div class="reveal reveal-delay-1 h-1.5 bg-graphite-600 rounded-full overflow-hidden mb-10 max-w-sm mx-auto">
+      <div id="wizard-progress" class="h-full bg-steel-500 rounded-full transition-all duration-500" style="width:25%"></div>
+    </div>
+
+    <div class="reveal reveal-delay-2 bg-graphite-700 border border-steel-500/20 rounded-xl p-6 sm:p-10 min-h-[340px] flex flex-col justify-center">
+
+      <!-- STEP 1 -->
+      <div id="wizard-step-1" class="wizard-step">
+        <p class="text-center text-slate-200 font-semibold mb-6">Paso 1 · ¿Qué tipo de problema tenés?</p>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <button data-cat="electricidad" class="wizard-cat-btn btn-lift reveal reveal-delay-1 bg-graphite-600 border border-steel-500/20 hover:border-steel-400 rounded-lg p-6 text-center transition">
+            <div class="w-10 h-10 mx-auto mb-3 text-steel-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+            </div>
+            <span class="font-semibold text-white">Electricidad</span>
+            <p class="text-xs text-slate-500 mt-1">Instalaciones, cableado, luces...</p>
+          </button>
+          <button data-cat="tecnologia" class="wizard-cat-btn btn-lift reveal reveal-delay-2 bg-graphite-600 border border-steel-500/20 hover:border-teal-400 rounded-lg p-6 text-center transition">
+            <div class="w-10 h-10 mx-auto mb-3 text-teal-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+            </div>
+            <span class="font-semibold text-white">Tecnología</span>
+            <p class="text-xs text-slate-500 mt-1">Cámaras, TV, celulares, consolas...</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="wizard-step-2" class="wizard-step hidden">
+        <p class="text-center text-slate-200 font-semibold mb-6">Paso 2 · ¿Cuál es el problema puntual?</p>
+        <div id="wizard-problem-list" class="grid sm:grid-cols-2 gap-3 mb-6"></div>
+        <button id="wizard-back-1" class="text-sm text-slate-400 hover:text-white transition inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          Volver
+        </button>
+      </div>
+
+      <!-- STEP 3: intención (instalar / reparar / personalizado) -->
+      <div id="wizard-step-3" class="wizard-step hidden">
+        <p class="text-center text-slate-200 font-semibold mb-1">Paso 3 · ¿Qué necesitás hacer?</p>
+        <p id="wizard-intent-context" class="text-center text-sm text-slate-500 mb-6"></p>
+        <div class="grid sm:grid-cols-3 gap-3 mb-6">
+          <button data-intent="instalar" class="wizard-intent-btn btn-lift bg-graphite-600 border border-steel-500/20 hover:border-steel-400 rounded-lg p-5 text-center transition">
+            <div class="w-9 h-9 mx-auto mb-2 text-steel-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <span class="font-semibold text-white text-sm">Quiero instalar</span>
+          </button>
+          <button data-intent="reparar" class="wizard-intent-btn btn-lift bg-graphite-600 border border-steel-500/20 hover:border-teal-400 rounded-lg p-5 text-center transition">
+            <div class="w-9 h-9 mx-auto mb-2 text-teal-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="m14.7 6.3 3 3L8 19H5v-3L14.7 6.3Z"/><path d="m13 8 3 3"/></svg>
+            </div>
+            <span class="font-semibold text-white text-sm">Necesito reparar</span>
+          </button>
+          <button data-intent="personalizado" class="wizard-intent-btn btn-lift bg-graphite-600 border border-steel-500/20 hover:border-led-400 rounded-lg p-5 text-center transition">
+            <div class="w-9 h-9 mx-auto mb-2 text-led-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M4 20h4L18 10a2.83 2.83 0 0 0-4-4L4 16v4Z"/></svg>
+            </div>
+            <span class="font-semibold text-white text-sm">Mensaje personalizado</span>
+          </button>
+        </div>
+        <button id="wizard-back-2" class="text-sm text-slate-400 hover:text-white transition inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          Volver
+        </button>
+      </div>
+
+      <!-- STEP 4: resultado -->
+      <div id="wizard-step-4" class="wizard-step hidden text-center">
+        <div class="w-16 h-16 mx-auto rounded-lg bg-graphite-600 border border-led-500/40 flex items-center justify-center mb-5 text-led-400 p-4">
+          <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <p class="text-slate-400 mb-1">Tu mensaje está listo para</p>
+        <p id="wizard-result-name" class="font-display text-2xl font-bold text-white mb-5"></p>
+        <p id="wizard-result-msg" class="text-sm text-slate-300 bg-graphite-600 border border-steel-500/15 rounded-lg p-4 mb-7 text-left whitespace-pre-line"></p>
+        <textarea id="wizard-result-textarea" class="hidden w-full text-sm text-slate-200 bg-graphite-600 border border-steel-500/20 rounded-lg p-4 mb-7 text-left resize-none focus:outline-none focus:border-steel-400" rows="5"></textarea>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a id="wizard-send" href="#" target="_blank" rel="noopener" class="btn-lift inline-flex items-center justify-center gap-2 bg-led-500 hover:bg-led-400 text-white font-semibold px-7 py-3.5 rounded-lg transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.9 11.9 0 0 0 12.06 0C5.5 0 .2 5.3.2 11.85c0 2.09.55 4.13 1.6 5.93L0 24l6.4-1.68a11.87 11.87 0 0 0 5.66 1.44h.01c6.55 0 11.86-5.3 11.86-11.85 0-3.17-1.24-6.15-3.41-8.43z"/></svg>
+            Enviar por WhatsApp
+          </a>
+          <button id="wizard-restart" class="btn-lift inline-flex items-center justify-center gap-2 border-2 border-slate-500/40 hover:bg-white/5 text-white font-semibold px-7 py-3.5 rounded-lg transition">
+            Empezar de nuevo
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= TALLER: VIDEO + CONTACTO COMPLETO ================= -->
+<section id="taller" class="relative py-20 sm:py-28 border-t border-steel-500/10 overflow-hidden">
+  <div class="relative max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-14 reveal">
+      <span class="text-steel-400 font-semibold tracking-widest text-xs uppercase">Conocé nuestro taller</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-3">Nuestro trabajo en acción</h2>
+      <p class="text-slate-400 mt-3 max-w-xl mx-auto">Mirá cómo trabajamos, con la misma dedicación de siempre.</p>
+    </div>
+
+    <!-- Reproductor de video local: pieza protagonista, a todo el ancho -->
+    <div class="reveal reveal-delay-1 card-lift bg-graphite-700 border border-steel-500/25 rounded-xl p-3 sm:p-4">
+      <div class="relative aspect-video rounded-lg overflow-hidden bg-graphite-600 border border-steel-500/30">
+        <!-- Marcas de esquina tipo visor de precisión -->
+        <span class="corner-mark top-4 left-4 border-t-2 border-l-2"></span>
+        <span class="corner-mark top-4 right-4 border-t-2 border-r-2"></span>
+        <span class="corner-mark bottom-4 left-4 border-b-2 border-l-2"></span>
+        <span class="corner-mark bottom-4 right-4 border-b-2 border-r-2"></span>
+
+        <video id="taller-video" class="w-full h-full object-cover" controls preload="metadata">
+          <source src="./video-1.mp4" type="video/mp4">
+          Tu navegador no admite la reproducción de video.
+        </video>
+
+        <!-- Botón flotante de Play -->
+        <button id="video-play-overlay" aria-label="Reproducir video" class="play-overlay absolute inset-0 flex items-center justify-center bg-graphite-900/30 group">
+          <span class="btn-lift w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-graphite-800/90 border-2 border-steel-400 flex items-center justify-center shadow-lg shadow-black/40">
+            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white translate-x-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z"/></svg>
+          </span>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mt-3 px-1">Video: trabajo real de nuestro taller familiar.</p>
+    </div>
+
+    <!-- Segundo video: ruta relativa, está en la misma carpeta que este HTML -->
+    <div class="reveal reveal-delay-2 card-lift bg-graphite-700 border border-steel-500/25 rounded-xl p-3 sm:p-4 mt-6">
+      <div class="relative aspect-[9/16] max-w-sm mx-auto rounded-lg overflow-hidden bg-graphite-600 border border-steel-500/30">
+        <span class="corner-mark top-4 left-4 border-t-2 border-l-2"></span>
+        <span class="corner-mark top-4 right-4 border-t-2 border-r-2"></span>
+        <span class="corner-mark bottom-4 left-4 border-b-2 border-l-2"></span>
+        <span class="corner-mark bottom-4 right-4 border-b-2 border-r-2"></span>
+
+        <video id="taller-video-2" class="w-full h-full object-contain" controls preload="metadata">
+          <source src="./video-2.mp4" type="video/mp4">
+          Tu navegador no admite la reproducción de video.
+        </video>
+
+        <!-- Botón flotante de Play -->
+        <button id="video-play-overlay-2" aria-label="Reproducir video" class="play-overlay absolute inset-0 flex items-center justify-center bg-graphite-900/30 group">
+          <span class="btn-lift w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-graphite-800/90 border-2 border-steel-400 flex items-center justify-center shadow-lg shadow-black/40">
+            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white translate-x-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5Z"/></svg>
+          </span>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mt-3 px-1">Video: más de nuestro trabajo día a día.</p>
+    </div>
+
+    <!-- Los dos nombres, sin repetir datos de contacto (eso vive solo en la sección Contacto) -->
+    <div class="reveal reveal-delay-3 text-center mt-8">
+      <p class="font-display text-xl sm:text-2xl font-bold text-white">
+        Alfredo <span class="text-slate-500 font-normal mx-1">&amp;</span> Agustín
+      </p>
+      <p class="text-slate-400 text-sm mt-1">Abuelo y nieto, dos oficios, un mismo compromiso familiar.</p>
+    </div>
+
+    <!-- Leyenda resaltada -->
+    <div class="reveal reveal-delay-4 mt-6 flex items-center justify-center gap-3 bg-steel-700 rounded-xl py-5 px-4">
+      <span class="w-2 h-2 rounded-full bg-led-400 animate-breathe shrink-0"></span>
+      <p class="font-display font-bold tracking-wide text-white text-sm sm:text-base uppercase">
+        15 años brindando la mejor atención
+      </p>
+      <span class="w-2 h-2 rounded-full bg-led-400 animate-breathe shrink-0"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACTO ================= -->
+<section id="contacto" class="relative py-20 sm:py-28 border-t border-steel-500/10">
+  <div class="relative max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="text-center mb-14 reveal">
+      <span class="text-steel-400 font-semibold tracking-widest text-xs uppercase">Contacto directo</span>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-3">Hablá ya con el especialista</h2>
+      <p class="text-slate-400 mt-3 max-w-xl mx-auto">Todas las formas de encontrarnos, en un solo lugar.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-8">
+      <div class="reveal reveal-delay-1 card-lift text-center bg-graphite-700 border border-steel-500/25 rounded-xl p-8 sm:p-10">
+        <div class="w-20 h-20 mx-auto rounded-lg border border-steel-500/50 bg-graphite-600 flex items-center justify-center p-5 text-steel-400 mb-5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+        </div>
+        <h3 class="font-display text-2xl font-bold text-white">Alfredo</h3>
+        <p class="text-steel-400 font-medium mb-6">Electricidad</p>
+        <div class="flex flex-col gap-3">
+          <a href="tel:+5491167989159" class="btn-lift inline-flex items-center justify-center gap-2 bg-steel-600 hover:bg-steel-500 text-white font-semibold px-6 py-3.5 rounded-lg transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.36 11.36 0 0 0 3.57.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .57 3.57 1 1 0 0 1-.25 1.01l-2.2 2.21z"/></svg>
+            11 6798-9159
+          </a>
+          <a href="https://wa.me/5491167989159" target="_blank" rel="noopener" class="btn-lift inline-flex items-center justify-center gap-2 border-2 border-led-500/50 hover:bg-led-500/10 text-led-400 font-semibold px-6 py-3.5 rounded-lg transition">
+            WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2 card-lift text-center bg-graphite-700 border border-teal-500/25 rounded-xl p-8 sm:p-10">
+        <div class="w-20 h-20 mx-auto rounded-lg border border-teal-500/50 bg-graphite-600 flex items-center justify-center p-5 text-teal-400 mb-5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+        </div>
+        <h3 class="font-display text-2xl font-bold text-white">Agustín</h3>
+        <p class="text-teal-400 font-medium mb-6">Tecnología</p>
+        <div class="flex flex-col gap-3">
+          <a href="tel:+5491132037576" class="btn-lift inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 py-3.5 rounded-lg transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.36 11.36 0 0 0 3.57.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .57 3.57 1 1 0 0 1-.25 1.01l-2.2 2.21z"/></svg>
+            11 3203-7576
+          </a>
+          <a href="https://wa.me/5491132037576" target="_blank" rel="noopener" class="btn-lift inline-flex items-center justify-center gap-2 border-2 border-led-500/50 hover:bg-led-500/10 text-led-400 font-semibold px-6 py-3.5 rounded-lg transition">
+            WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4 mt-6">
+      <!-- Ubicación -->
+      <div class="reveal reveal-delay-3 card-lift flex items-center gap-3 bg-graphite-700 border border-steel-500/20 rounded-xl p-5">
+        <div class="w-11 h-11 rounded-lg border border-steel-500/40 bg-graphite-600 flex items-center justify-center p-2.5 text-slate-300 shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+        </div>
+        <div>
+          <!-- Editá esta zona por tu área real de cobertura -->
+          <p class="text-xs text-slate-500 uppercase tracking-wide">Zona de atención</p>
+          <p class="font-semibold text-white">Buenos Aires zona sur</p>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <a href="https://mail.google.com/mail/?view=cm&fs=1&to=agustinamarilla2006@gmail.com&su=Consulta%20desde%20la%20p%C3%A1gina%20web" target="_blank" rel="noopener" class="reveal reveal-delay-4 card-lift flex items-center gap-3 bg-graphite-700 border border-steel-500/20 rounded-xl p-5">
+        <div class="w-11 h-11 rounded-lg border border-steel-500/40 bg-graphite-600 flex items-center justify-center p-2.5 text-slate-300 shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 uppercase tracking-wide">Email</p>
+          <p class="font-semibold text-white break-all text-sm">agustinamarilla2006@gmail.com</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="border-t border-steel-500/10 py-10">
+  <div class="reveal max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg border border-steel-500/60 bg-graphite-700 flex items-center justify-center p-1.5 text-steel-400">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+      </div>
+      <span class="font-display font-bold text-white text-sm">Electricidad &amp; Tecnología</span>
+    </div>
+    <p class="text-slate-500 text-sm text-center">© 2026 · Negocio familiar · "15 años brindando la mejor atención"</p>
+  </div>
+</footer>
+
+<!-- ================= WHATSAPP FLOTANTE ================= -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+  <div id="wa-menu" class="wa-pop flex flex-col gap-2.5 mb-1">
+    <a href="https://wa.me/5491167989159" target="_blank" rel="noopener" class="flex items-center gap-3 bg-graphite-700 border border-steel-500/25 hover:border-steel-400 text-white text-sm font-semibold pl-3 pr-5 py-2.5 rounded-lg shadow-lg shadow-black/30 whitespace-nowrap">
+      <span class="w-5 h-5 text-steel-400"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span>
+      Alfredo · Electricidad
+    </a>
+    <a href="https://wa.me/5491132037576" target="_blank" rel="noopener" class="flex items-center gap-3 bg-graphite-700 border border-steel-500/25 hover:border-teal-400 text-white text-sm font-semibold pl-3 pr-5 py-2.5 rounded-lg shadow-lg shadow-black/30 whitespace-nowrap">
+      <span class="w-5 h-5 text-teal-400"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
+      Agustín · Tecnología
+    </a>
+  </div>
+
+  <button id="wa-toggle" aria-label="Abrir WhatsApp" class="btn-lift w-16 h-16 rounded-full bg-led-500 hover:bg-led-400 flex items-center justify-center shadow-lg shadow-black/40 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.9 11.9 0 0 0 12.06 0C5.5 0 .2 5.3.2 11.85c0 2.09.55 4.13 1.6 5.93L0 24l6.4-1.68a11.87 11.87 0 0 0 5.66 1.44h.01c6.55 0 11.86-5.3 11.86-11.85 0-3.17-1.24-6.15-3.41-8.43zM12.06 21.6a9.7 9.7 0 0 1-4.95-1.36l-.35-.21-3.8 1 1.01-3.7-.23-.38a9.75 9.75 0 1 1 8.32 4.65zm5.34-7.3c-.29-.15-1.73-.86-2-.96s-.46-.15-.65.15-.75.96-.92 1.16-.34.22-.63.07a8 8 0 0 1-2.35-1.45 8.8 8.8 0 0 1-1.63-2.02c-.17-.29 0-.45.13-.6.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.65-1.57-.9-2.15-.23-.56-.47-.48-.65-.49h-.56a1.07 1.07 0 0 0-.78.36 3.27 3.27 0 0 0-1.02 2.43c0 1.43 1.04 2.82 1.19 3.01.15.19 2.05 3.13 4.96 4.39a16.6 16.6 0 0 0 1.66.61c.7.22 1.33.19 1.83.11.56-.08 1.73-.71 1.97-1.39.24-.68.24-1.27.17-1.39-.07-.13-.26-.2-.55-.35z"/></svg>
+  </button>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const ICONS = {
+  bolt:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>`,
+  device: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>`,
+  check:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M20 6 9 17l-5-5"/></svg>`,
+};
+
+const SERVICES = {
+  electricidad: {
+    name: 'Alfredo', icon: 'bolt', phone: '5491167989159', accent: 'steel',
+    items: ['Cañería exterior','Instalación de ventiladores','Fotocélulas','Sensores de movimiento','Motores originales Liliana','Cableado de alta calidad','Instalación de luces','Controles remotos','Reparación de radios']
+  },
+  tecnologia: {
+    name: 'Agustín', icon: 'device', phone: '5491132037576', accent: 'teal',
+    items: ['Cámaras de seguridad y DVR','Smart TV y Televisión','Celulares','Monitores','Consolas "PlayStation"']
+  }
+};
+
+const ACCENTS = {
+  steel: { text:'text-steel-400', border:'border-steel-500/30', indicator:'bg-steel-500' },
+  teal:  { text:'text-teal-400',  border:'border-teal-500/30',  indicator:'bg-teal-600' },
+};
+
+/* ============ SONIDO DE INTERFAZ (tonos cortos generados, sin archivos) ============ */
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new Ctx();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+document.addEventListener('pointerdown', function unlockAudio(){
+  getAudioCtx();
+  document.removeEventListener('pointerdown', unlockAudio);
+}, { once:true });
+
+function safeStorageGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function safeStorageSet(key, value){ try{ localStorage.setItem(key, value); }catch(e){} }
+
+let soundEnabled = safeStorageGet('soundEnabled') !== 'false';
+let lastSoundAt = 0;
+
+function playTone({ freq = 700, glideTo = null, duration = 0.05, type = 'sine', volume = 0.04 } = {}){
+  if(!soundEnabled) return;
+  const now = performance.now();
+  if(now - lastSoundAt < 55) return; // evita saturar el oído si el mouse recorre varios ítems rápido
+  lastSoundAt = now;
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, ctx.currentTime + duration);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(volume, ctx.currentTime + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration + 0.03);
+  }catch(e){ /* Web Audio no disponible: se navega en silencio */ }
+}
+
+const playHoverSound = () => playTone({ freq:1250, duration:0.045, type:'sine', volume:0.028 });
+const playClickSound = () => playTone({ freq:640, glideTo:960, duration:0.09, type:'sine', volume:0.05 });
+
+function bindSoundEvents(root = document){
+  root.querySelectorAll('a, button').forEach(el => {
+    if(el.dataset.soundBound) return;
+    el.dataset.soundBound = '1';
+    el.addEventListener('mouseenter', playHoverSound);
+    el.addEventListener('click', playClickSound);
+  });
+}
+bindSoundEvents();
+
+const soundToggleBtn = document.getElementById('sound-toggle');
+const soundIconOn = document.getElementById('sound-icon-on');
+const soundIconOff = document.getElementById('sound-icon-off');
+function updateSoundIcon(){
+  soundIconOn.classList.toggle('hidden', !soundEnabled);
+  soundIconOff.classList.toggle('hidden', soundEnabled);
+  soundToggleBtn.setAttribute('aria-pressed', String(soundEnabled));
+}
+updateSoundIcon();
+soundToggleBtn.addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  safeStorageSet('soundEnabled', String(soundEnabled));
+  updateSoundIcon();
+  if(soundEnabled) playClickSound();
+});
+
+/* ============ FONDO ANIMADO: RED DE NODOS INTERACTIVA + PULSOS DE ENERGÍA ============ */
+const cursorGlow = document.getElementById('cursor-glow');
+
+(function backgroundNetwork(){
+  const canvas = document.getElementById('bg-canvas');
+  if(!canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d');
+  const LINK_DIST = 190;
+  const REPEL_DIST = 130;
+  let w, h, nodes, pulses = [];
+  const mouse = { x: -9999, y: -9999, active: false };
+
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    const count = Math.max(50, Math.min(130, Math.round((w*h)/14000)));
+    nodes = Array.from({ length: count }, () => ({
+      x: Math.random()*w, y: Math.random()*h,
+      vx: (Math.random()-0.5)*0.55, vy: (Math.random()-0.5)*0.55,
+      r: Math.random()*1.5 + 1,
+      teal: Math.random() < 0.35,
+    }));
+  }
+
+  function maybeSpawnPulse(){
+    if(Math.random() > 0.045) return;
+    const a = nodes[Math.floor(Math.random()*nodes.length)];
+    let best = null, bestDist = LINK_DIST;
+    for(const b of nodes){
+      if(b === a) continue;
+      const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if(d < bestDist){ bestDist = d; best = b; }
+    }
+    if(best) pulses.push({ a, b: best, t: 0, speed: 0.014 + Math.random()*0.012 });
+  }
+
+  function frame(){
+    ctx.clearRect(0, 0, w, h);
+
+    for(const n of nodes){
+      n.x += n.vx; n.y += n.vy;
+      if(n.x < 0 || n.x > w) n.vx *= -1;
+      if(n.y < 0 || n.y > h) n.vy *= -1;
+
+      if(mouse.active){
+        const dx = n.x - mouse.x, dy = n.y - mouse.y;
+        const d = Math.hypot(dx, dy);
+        if(d < REPEL_DIST && d > 0.01){
+          const force = (1 - d/REPEL_DIST) * 0.7;
+          n.x += (dx/d) * force;
+          n.y += (dy/d) * force;
+        }
+      }
+    }
+
+    for(let i=0; i<nodes.length; i++){
+      for(let j=i+1; j<nodes.length; j++){
+        const a = nodes[i], b = nodes[j];
+        const d = Math.hypot(a.x-b.x, a.y-b.y);
+        if(d < LINK_DIST){
+          ctx.strokeStyle = `rgba(90,139,201,${(1 - d/LINK_DIST) * 0.24})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+
+    if(mouse.active){
+      for(const n of nodes){
+        const d = Math.hypot(n.x-mouse.x, n.y-mouse.y);
+        if(d < LINK_DIST){
+          ctx.strokeStyle = `rgba(52,211,153,${(1 - d/LINK_DIST) * 0.4})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(mouse.x, mouse.y); ctx.lineTo(n.x, n.y); ctx.stroke();
+        }
+      }
+      ctx.fillStyle = 'rgba(52,211,153,0.75)';
+      ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 3, 0, Math.PI*2); ctx.fill();
+    }
+
+    for(const n of nodes){
+      ctx.fillStyle = n.teal ? 'rgba(95,173,167,0.6)' : 'rgba(90,139,201,0.6)';
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+    }
+
+    maybeSpawnPulse();
+    pulses = pulses.filter(p => p.t < 1);
+    for(const p of pulses){
+      p.t += p.speed;
+      const x = p.a.x + (p.b.x - p.a.x) * p.t;
+      const y = p.a.y + (p.b.y - p.a.y) * p.t;
+      const fade = Math.sin(p.t * Math.PI);
+      ctx.fillStyle = `rgba(52,211,153,${0.9 * fade})`;
+      ctx.beginPath(); ctx.arc(x, y, 2.4, 0, Math.PI*2); ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  resize();
+  frame();
+  window.addEventListener('resize', resize);
+
+  window.addEventListener('pointermove', e => {
+    mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
+    cursorGlow.style.setProperty('--mx', e.clientX + 'px');
+    cursorGlow.style.setProperty('--my', e.clientY + 'px');
+  }, { passive: true });
+  window.addEventListener('pointerleave', () => { mouse.active = false; });
+})();
+
+/* ============ SCROLL REVEAL (fade-in sutil) ============ */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.classList.add('in-view');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ============ SERVICIOS: LISTAS COMPLETAS ============ */
+function renderServiceList(containerId, categoryKey){
+  const data = SERVICES[categoryKey];
+  const accent = ACCENTS[data.accent];
+  const container = document.getElementById(containerId);
+
+  container.innerHTML = data.items.map((item, idx) => `
+    <div class="reveal flex items-center gap-3 bg-graphite-600 border ${accent.border} rounded-lg px-4 py-3" style="transition-delay:${idx*60}ms">
+      <span class="w-4 h-4 shrink-0 ${accent.text}">${ICONS.check}</span>
+      <span class="text-slate-200 text-sm sm:text-base">${item}</span>
+    </div>`).join('');
+  container.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+}
+
+renderServiceList('svc-list-electricidad', 'electricidad');
+renderServiceList('svc-list-tecnologia', 'tecnologia');
+
+/* ============ COTIZADOR (WIZARD) ============ */
+const wizard = { category: null, problem: null, intent: null };
+const stepEls = {
+  1: document.getElementById('wizard-step-1'),
+  2: document.getElementById('wizard-step-2'),
+  3: document.getElementById('wizard-step-3'),
+  4: document.getElementById('wizard-step-4'),
+};
+const progress = document.getElementById('wizard-progress');
+const problemList = document.getElementById('wizard-problem-list');
+const TOTAL_STEPS = 4;
+
+function goToStep(n){
+  Object.values(stepEls).forEach(el => el.classList.add('hidden'));
+  stepEls[n].classList.remove('hidden');
+  stepEls[n].classList.remove('wizard-step');
+  void stepEls[n].offsetWidth;
+  stepEls[n].classList.add('wizard-step');
+  progress.style.width = (n/TOTAL_STEPS*100) + '%';
+}
+
+document.querySelectorAll('.wizard-cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    wizard.category = btn.dataset.cat;
+    const data = SERVICES[wizard.category];
+    const accentBorder = wizard.category === 'electricidad' ? 'hover:border-steel-400' : 'hover:border-teal-400';
+
+    problemList.innerHTML = data.items.map(item => `
+      <button data-problem="${item.replace(/"/g,'&quot;')}" class="wizard-problem-btn btn-lift text-left bg-graphite-600 border border-steel-500/20 ${accentBorder} rounded-lg px-4 py-3 text-sm text-slate-200 transition">${item}</button>
+    `).join('') + `
+      <button data-problem="Otro problema (a confirmar)" class="wizard-problem-btn btn-lift text-left bg-graphite-600 border border-steel-500/20 ${accentBorder} rounded-lg px-4 py-3 text-sm text-slate-200 transition italic">Otro / no está en la lista</button>
+    `;
+
+    bindSoundEvents(problemList);
+    problemList.querySelectorAll('.wizard-problem-btn').forEach(pbtn => {
+      pbtn.addEventListener('click', () => {
+        wizard.problem = pbtn.dataset.problem;
+        document.getElementById('wizard-intent-context').textContent = `Sobre: ${wizard.problem}`;
+        goToStep(3);
+      });
+    });
+
+    goToStep(2);
+  });
+});
+
+document.querySelectorAll('.wizard-intent-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    wizard.intent = btn.dataset.intent;
+    showResult();
+  });
+});
+
+document.getElementById('wizard-back-1').addEventListener('click', () => goToStep(1));
+document.getElementById('wizard-back-2').addEventListener('click', () => goToStep(2));
+document.getElementById('wizard-restart').addEventListener('click', () => {
+  wizard.category = null; wizard.problem = null; wizard.intent = null;
+  goToStep(1);
+});
+
+function showResult(){
+  const data = SERVICES[wizard.category];
+  const categoryLabel = wizard.category === 'electricidad' ? 'Electricidad' : 'Tecnología';
+  const resultMsgEl = document.getElementById('wizard-result-msg');
+  const resultTextarea = document.getElementById('wizard-result-textarea');
+  const sendBtn = document.getElementById('wizard-send');
+
+  let message;
+  if(wizard.intent === 'instalar'){
+    message = `Hola ${data.name}! Vengo desde la página web.\nQuiero instalar: ${wizard.problem} (${categoryLabel}).`;
+  } else if(wizard.intent === 'reparar'){
+    message = `Hola ${data.name}! Vengo desde la página web.\nNecesito reparar: ${wizard.problem} (${categoryLabel}).`;
+  } else {
+    message = `Hola ${data.name}! Vengo desde la página web.\nTe escribo por: ${wizard.problem} (${categoryLabel}).\n`;
+  }
+
+  document.getElementById('wizard-result-name').textContent = `${data.name} · ${categoryLabel}`;
+
+  if(wizard.intent === 'personalizado'){
+    resultMsgEl.classList.add('hidden');
+    resultTextarea.classList.remove('hidden');
+    resultTextarea.value = message;
+    sendBtn.href = `https://wa.me/${data.phone}?text=${encodeURIComponent(message)}`;
+    resultTextarea.oninput = () => {
+      sendBtn.href = `https://wa.me/${data.phone}?text=${encodeURIComponent(resultTextarea.value)}`;
+    };
+  } else {
+    resultTextarea.classList.add('hidden');
+    resultMsgEl.classList.remove('hidden');
+    resultMsgEl.textContent = message;
+    sendBtn.href = `https://wa.me/${data.phone}?text=${encodeURIComponent(message)}`;
+  }
+
+  goToStep(4);
+}
+
+/* ============ VIDEOS DEL TALLER ============ */
+function wireVideoPlayButton(videoId, overlayId){
+  const video = document.getElementById(videoId);
+  const overlay = document.getElementById(overlayId);
+  if(!video || !overlay) return;
+  overlay.addEventListener('click', () => video.play());
+  video.addEventListener('play', () => overlay.classList.add('is-hidden'));
+  video.addEventListener('pause', () => overlay.classList.remove('is-hidden'));
+  video.addEventListener('ended', () => overlay.classList.remove('is-hidden'));
+}
+wireVideoPlayButton('taller-video', 'video-play-overlay');
+wireVideoPlayButton('taller-video-2', 'video-play-overlay-2');
+
+/* ============ WHATSAPP FLOTANTE ============ */
+const waToggle = document.getElementById('wa-toggle');
+const waMenu = document.getElementById('wa-menu');
+waToggle.addEventListener('click', () => waMenu.classList.toggle('open'));
+document.addEventListener('click', (e) => {
+  if(!waToggle.contains(e.target) && !waMenu.contains(e.target)) waMenu.classList.remove('open');
+});
+</script>
+
+</body>
+</html>
